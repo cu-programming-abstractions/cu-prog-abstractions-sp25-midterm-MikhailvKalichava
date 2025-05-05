@@ -1,39 +1,59 @@
 #include "maze_solver.h"
 #include <stack>
+#include <fstream>
+#include <filesystem>
+#include <iostream>
+
 using namespace std;
 
 bool MazeSolver::dfs(Maze& maze, int r, int c, vector<vector<bool>>& visited) {
-    /* TODO: Implement recursive DFS with backtracking.
 
-    Suggested steps:
-    1. Guard   – out of bounds, wall, or already visited ➔ return false
-    2. Goal    – if (r,c) == finish, add to path and return true
-    3. Mark    – visited[r][c] = true
-    4. Explore – recursively call dfs on N,E,S,W
-    5. Success – if any recursive call returns true, push current cell onto
-                 maze.path and return true
-    6. Fail    – otherwise return false
-    */
+    if (!maze.inBounds(r, c) || maze.isWall(r, c) || visited[r][c]) {
+        return false;
+    }
 
-    // TODO: Your implementation here
+
+    cout << "Visiting: (" << r << ", " << c << ")\n";
+
+
+    if (maze.finish.row == r && maze.finish.col == c) {
+        maze.path.push_back({r, c});
+        return true;
+    }
+
+
+    visited[r][c] = true;
+
+
+    const int dr[] = {-1, 0, 1, 0};
+    const int dc[] = {0, 1, 0, -1};
+
+    for (int dir = 0; dir < 4; ++dir) {
+        int nr = r + dr[dir];
+        int nc = c + dc[dir];
+        if (dfs(maze, nr, nc, visited)) {
+            maze.path.push_back({r, c});
+            return true;
+        }
+    }
+
+
     return false;
 }
 
 bool MazeSolver::solveDFS(Maze& maze) {
-    // Clear any existing path
     maze.path.clear();
-    
-    // Create visited matrix
-    vector<vector<bool>> visited(maze.grid.size(), 
-                               vector<bool>(maze.grid[0].size(), false));
-    
-    // Start DFS from the start position
+
+    vector<vector<bool>> visited(maze.grid.size(),
+                                 vector<bool>(maze.grid[0].size(), false));
+
     bool found = dfs(maze, maze.start.row, maze.start.col, visited);
-    
-    // If path found, add the start position to the path
+
+    cout << "Solving maze started...\n";
+
     if (found) {
         maze.path.push_back(maze.start);
     }
-    
+
     return found;
 }
